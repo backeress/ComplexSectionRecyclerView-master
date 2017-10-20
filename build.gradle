@@ -15,8 +15,26 @@ buildscript {
 }
 
 allprojects {
+    //소스 인코딩 지정밥법
+    //bintray 등록하기 위해 컴파일 중에 unmappable character for encoding MS949 인코딩 오류가
+    //한글로 인해 발생한다. 아래는 해결 방법이다.
+    /*tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }*/
+    tasks.withType(Javadoc) {
+        //options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
+    }
+
+
+
     repositories {
         jcenter()
+        maven {
+            //bintray.com 에 등록 되어 있더라도 jCenter 추가 하지 않았다면,
+            //아래와 같이 저장소의 url 주소를 반드시 알려줘야 jCenter 에서 모듈을 가져올 수 있다.
+            url 'https://dl.bintray.com/backeres/maven/'
+        }
     }
 }
 

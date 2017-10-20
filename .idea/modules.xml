@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ComplexSectionRecyclerView-master.iml" filepath="$PROJECT_DIR$/ComplexSectionRecyclerView-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/complex-section-recyclerview/complex-section-recyclerview.iml" filepath="$PROJECT_DIR$/complex-section-recyclerview/complex-section-recyclerview.iml" />
     </modules>
   </component>
 </project>

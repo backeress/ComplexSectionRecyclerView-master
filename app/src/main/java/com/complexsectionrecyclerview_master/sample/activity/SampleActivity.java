@@ -76,25 +76,26 @@ public class SampleActivity extends AppCompatActivity {
 
 
 
-            //섹션 리스트
+            //[섹션 목록]
             ArrayList<Section> sections = new ArrayList<>();;
-            //섹션 생성 후 아이템 추가
+
+
+
+            //[첫번째 섹션 생성]
             Section section1 = new Section();
             section1.setHeader(new Header("[header1]"));
-            section1.setFooter(new Footer("[1footer]"));
-            //기본 아이템
+            //section1.setFooter(new Footer("[1footer]"));
+            // - 기본 아이템
             section1.addItem(new Item("1:1"));
-            //커스텀뷰 아이템
+            // - 커스텀뷰 아이템
             section1.addItem(new Item(ComplexSectionRecyclerViewAdapter.USER_ITEM_TYPE_CUSTOM_STRING,"커스텀 문자열"));
             section1.addItem(new Item(ComplexSectionRecyclerViewAdapter.USER_ITEM_TYPE_CUSTOM_NUMBER,15));
             section1.addItem(new Item(ComplexSectionRecyclerViewAdapter.USER_ITEM_TYPE_CUSTOM_OBJECT, new ItemCustomObject("커스텀 오브젝트")));
+            // - 기본 아이템
             section1.addItem(new Item("1:2"));
-            //섹션 리스트에 추가
-            sections.add(section1);
-
-            /*
 
 
+            //[두번째 섹션 생성]
             Section section2 = new Section();
             section2.setHeader(new Header("[header2]"));
             section2.setFooter(new Footer("[2footer]"));
@@ -108,8 +109,11 @@ public class SampleActivity extends AppCompatActivity {
             section2.addItem(new Item("2:2"));
             section2.addItem(new Item("2:1"));
             section2.addItem(new Item("2:2"));
-            sections.add(section2);*/
 
+
+            //섹션 목록 추가
+            sections.add(section1);
+            sections.add(section2);
 
             //아답터 연동
             mRecyclerVieAdapter = new ComplexSectionRecyclerViewAdapter(this.mContext, this.recyclerView, sections);

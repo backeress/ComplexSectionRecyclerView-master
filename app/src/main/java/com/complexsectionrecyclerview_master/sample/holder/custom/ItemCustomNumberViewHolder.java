@@ -5,10 +5,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.complex_section_recyclerview.holer.BaseViewHolder;
 import com.complexsectionrecyclerview_master.DLog;
 import com.complexsectionrecyclerview_master.R;
 import com.complexsectionrecyclerview_master.sample.model.Item;
-import com.library.holer.BaseViewHolder;
 
 
 /**

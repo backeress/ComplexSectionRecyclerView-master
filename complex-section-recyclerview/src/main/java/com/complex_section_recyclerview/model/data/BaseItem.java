@@ -1,7 +1,7 @@
-package com.library.model.data;
+package com.complex_section_recyclerview.model.data;
 
 
-import com.library.model.data.interfaces.IItem;
+import com.complex_section_recyclerview.model.data.interfaces.IItem;
 
 /**
  * Created by sung on 2017-10-19.

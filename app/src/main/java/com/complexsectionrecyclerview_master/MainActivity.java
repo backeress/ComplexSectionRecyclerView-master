@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.complexsectionrecyclerview_master.sample.activity.SampleActivity;
+import com.complexsectionrecyclerview_master.sample.adapter.ComplexSectionRecyclerViewAdapter;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -51,12 +52,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, SampleActivity.class);
         this.startActivity(intent);
 
-        /*
-        int userType = 100;
-        int baseType = 2;
-        DLog.e("결과 : "+(((userType & 0xFF) << 8) | (baseType & 0xFF)) );*/
-        //DLog.e("확인1 : "+((userType & 0xFF) << 8) | (baseType & 0xFF);)
-        //DLog.e("확인1 : "+((userType & 0xFF) << 8) | (baseType & 0xFF);)
+
     }
 
     @Override

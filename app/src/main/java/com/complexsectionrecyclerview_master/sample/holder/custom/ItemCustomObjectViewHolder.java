@@ -5,12 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.complex_section_recyclerview.holer.BaseViewHolder;
 import com.complexsectionrecyclerview_master.DLog;
 import com.complexsectionrecyclerview_master.R;
-import com.complexsectionrecyclerview_master.sample.model.Footer;
 import com.complexsectionrecyclerview_master.sample.model.Item;
 import com.complexsectionrecyclerview_master.sample.model.custom_item.ItemCustomObject;
-import com.library.holer.BaseViewHolder;
 
 /**
  * Created by sung on 2017-10-19.

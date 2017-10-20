@@ -1,17 +1,17 @@
-package com.library.adater;
+package com.complex_section_recyclerview.adater;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.library.decoration.StickyHeaderDecoration;
-import com.library.holer.BaseViewHolder;
-import com.library.model.data.BaseFooter;
-import com.library.model.data.BaseHeader;
-import com.library.model.data.BaseItem;
-import com.library.model.section.BaseSection;
-import com.library.util.DLog;
+import com.complex_section_recyclerview.decoration.StickyHeaderDecoration;
+import com.complex_section_recyclerview.holer.BaseViewHolder;
+import com.complex_section_recyclerview.model.data.BaseFooter;
+import com.complex_section_recyclerview.model.data.BaseHeader;
+import com.complex_section_recyclerview.model.data.BaseItem;
+import com.complex_section_recyclerview.model.section.BaseSection;
+import com.complex_section_recyclerview.util.DLog;
 
 import java.util.ArrayList;
 
