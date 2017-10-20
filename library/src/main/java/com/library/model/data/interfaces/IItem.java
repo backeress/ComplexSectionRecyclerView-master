@@ -1,10 +1,11 @@
-package com.library.model.data;
+package com.library.model.data.interfaces;
 
 /**
  * Created by sung on 2017-10-10.
  */
 
 public interface IItem {
+
 
     //뷰탑입 반드시 구현되어야 한다.
     void setViewType(int viewType);

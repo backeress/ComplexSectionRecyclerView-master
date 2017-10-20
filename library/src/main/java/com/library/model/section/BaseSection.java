@@ -51,9 +51,9 @@ public class BaseSection implements ISection<BaseHeader,BaseItem,BaseFooter> {
 
     @Override
     public int getItemCount() {
-        if( null == this.items )
+        if( null == this.getItems() )
             return 0;
-        return this.items.size();
+        return this.getItems().size();
     }
 
     @Override
@@ -64,8 +64,8 @@ public class BaseSection implements ISection<BaseHeader,BaseItem,BaseFooter> {
     @Override
     public void addItem(BaseItem item) {
 
-        if( null != this.items )
-            this.items.add(item);
+        if( null != this.getItems() )
+            this.getItems().add(item);
     }
 
     @Override
@@ -75,22 +75,22 @@ public class BaseSection implements ISection<BaseHeader,BaseItem,BaseFooter> {
 
     @Override
     public void addItems(List<BaseItem> baseItems) {
-        this.items.addAll(items);
+        this.getItems().addAll(baseItems);
 
     }
 
     @Override
     public void removeItem(int position) {
-        if( null != this.items )
-            this.items.remove(position);
+        if( null != this.getItems() )
+            this.getItems().remove(position);
 
     }
 
     @Override
     public int removeItem(BaseItem item) {
-        if( null != this.items ){
+        if( null != this.getItems() ){
 
-            int index = items.indexOf(item);
+            int index = this.getItems().indexOf(item);
             if (index >= 0) {
                 removeItem(index);
                 return index;
@@ -106,13 +106,21 @@ public class BaseSection implements ISection<BaseHeader,BaseItem,BaseFooter> {
         int totalCount = 0;
 
         //아이템
-        if( null != this.items )
-            totalCount += this.items.size();
+        totalCount+= this.getItemCount();
         //헤더
         totalCount+=(this.hasHeader()? 1 : 0);
         //푸터
         totalCount+=(this.hasFooter()? 1 : 0);
 
         return totalCount;
+    }
+
+    @Override
+    public BaseItem getItem(int itemPosition) {
+
+        if( this.getItemCount() > itemPosition )
+            return this.getItems().get(itemPosition);
+
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.library.model.data;
+package com.library.model.data.interfaces;
 
 /**
  * Created by sung on 2017-10-10.

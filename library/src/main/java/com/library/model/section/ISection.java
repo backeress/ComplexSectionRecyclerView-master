@@ -19,6 +19,7 @@ public interface ISection<HEADER,ITEM,FOOTER> {
     int getItemCount();
     //섹션에 포함 된 포든 아이템 토탈(헤더+아이템+푸터)
     int getSectionItemsTotal();
+    ITEM getItem(int itemPosition);
     List<ITEM> getItems();
     void addItem(ITEM item);
     void addItems(ITEM... items);

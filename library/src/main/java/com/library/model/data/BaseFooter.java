@@ -1,6 +1,8 @@
 package com.library.model.data;
 
 
+import com.library.model.data.interfaces.IFooter;
+
 /**
  * Created by sung on 2017-10-19.
  */

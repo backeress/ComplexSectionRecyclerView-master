@@ -27,8 +27,6 @@ public abstract class BaseViewHolder <ITEM> extends RecyclerView.ViewHolder impl
     }
     //기본 뷰타입 호출
     public abstract void onBindView(ITEM item);
-    //커스텀 뷰타입 호출
-    //커스텀 뷰타입이 하나 이상이라면, case 로 데이터를 형변환하여 처리 되도록 해야 한다.
-    public abstract void onCustomBindView(Object item);
+
 
 }

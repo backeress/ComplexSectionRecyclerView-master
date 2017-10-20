@@ -3,6 +3,7 @@ package com.library.adater;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.library.decoration.StickyHeaderDecoration;
@@ -11,6 +12,7 @@ import com.library.model.data.BaseFooter;
 import com.library.model.data.BaseHeader;
 import com.library.model.data.BaseItem;
 import com.library.model.section.BaseSection;
+import com.library.util.DLog;
 
 import java.util.ArrayList;
 
@@ -24,10 +26,15 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
 {
 
 
+
     //섹션 뷰타입
-    public static final int BASE_SECTION_VIEW_TYPE_HEADER = 0;
-    public static final int BASE_SECTION_VIEW_TYPE_ITEM = 1;
-    public static final int BASE_SECTION_VIEW_TYPE_FOOTER = 2;
+    //BASE_SECTION_VIEW_TYPE :
+    // - 헤더/아이템/푸터뷰 사용자 타입을 지정하지 않을 경우 반환되는 번호
+    // - 뷰타입 번호가 BASE_SECTION_VIEW_TYPE(0) 반환되면 헤더/아이템/푸터의 기본 뷰 타입으로 출력 한다.
+    public static final int BASE_SECTION_VIEW_TYPE = 0;
+    public static final int BASE_SECTION_VIEW_TYPE_HEADER = 1;
+    public static final int BASE_SECTION_VIEW_TYPE_ITEM = 2;
+    public static final int BASE_SECTION_VIEW_TYPE_FOOTER = 3;
 
     //컨텍스트
     Context context;
@@ -49,36 +56,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
         this.context = context;
         this.recyclerView = recyclerView;
         this.sections = sections;
-
-        //
-        //Log.e("Dlog","ComplexSectionRecyclerView() sections.size() : "+sections.size());
-
-        /*
-        섹션을 위치를 배열에 미리 기억 시킬 경우
-        속도나 성능적으로 좋을 수 있으나 유지 관리는 별로인 겻 같다.
-        사용하지 않고, 이런 방법도 가능하다는 정도의 주석으로 남겨 둔다.
-
-        private int[] arrSectionPositionByAdapterPosition;
-        private int[] arrSectionItemPositionByAdapterPosition;
-        this.arrSectionPositionByAdapterPosition = new int[totalCount];
-        this.arrSectionItemPositionByAdapterPosition = new int[totalCount];
-
-         int totalCount = 0;
-        for ( SECTION section : this.sections)
-            totalCount += section.getSectionItemsTotal();
-
-        int sectionNumbers = 0;
-        for (int sectionIndex = 0; sectionIndex < this.sections.size(); sectionIndex++) {
-            SECTION section = sections.get(sectionIndex);
-
-            //섹션 하위의 모든 아이템은 부모의 섹션 인덱스를 가진다.
-            for (int itemIndex = 0; itemIndex < section.getSectionItemsTotal(); itemIndex++) {
-                this.arrSectionPositionByAdapterPosition[sectionNumbers + itemIndex] = sectionIndex;
-                this.arrSectionItemPositionByAdapterPosition[sectionNumbers + itemIndex] = itemIndex;
-            }
-            sectionNumbers += section.getSectionItemsTotal();
-        }*/
-
+        //DLog.e("sections.size() : "+sections.size());
     }
 
 
@@ -101,8 +79,9 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
             // - 세션 헤더/아이템/푸터의 뷰타입을 유저 뷰타입으로 출력 한다.
             int userViewType = unmaskUserViewType(viewType);
 
-            //Log.e("Dlog","onCreateViewHolder() viewType : "+viewType);
-            //Log.e("Dlog","onCreateViewHolder() userViewType : "+userViewType);
+            //DLog.d("viewType : "+viewType);
+            //DLog.d("baseViewType : "+baseViewType);
+            //DLog.d("userViewType : "+userViewType);
 
             switch (baseViewType) {
                 case BASE_SECTION_VIEW_TYPE_HEADER:
@@ -113,13 +92,15 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
                     return onCreateItemViewHolder(parent, userViewType);
                 case BASE_SECTION_VIEW_TYPE_FOOTER:
                     return onCreateFooterViewHolder(parent, userViewType);
+                default:
+                    throw new IndexOutOfBoundsException("알수없는 타입 : " + viewType + " 헤더/아이템/푸터 타입이 아닙니다.");
             }
 
         }catch(Exception ex){
+            DLog.e(ex);
             throw ex;
         }
 
-        throw new IndexOutOfBoundsException("알수없는 타입 : " + viewType + " 헤더/아이템/푸터 타입이 아닙니다.");
     }
 
 
@@ -133,7 +114,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
 
         try{
 
-            //Log.e("Dlog","onBindViewHolder() adapterPosition : "+adapterPosition);
+            //DLog.d("adapterPosition : "+adapterPosition);
 
 
             //섹션 포지션
@@ -166,6 +147,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
             }
 
         }catch(Exception ex){
+            DLog.e(ex);
             throw ex;
         }
 
@@ -181,9 +163,9 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     @Override
     public int getItemViewType(int adapterPosition) {
 
-        //Log.e("Dlog","getItemViewType() adapterPosition : "+adapterPosition);
+        //DLog.d("adapterPosition : "+adapterPosition);
 
-        int baseType = 0;
+        int baseType;
         int userType = 0;
         try{
 
@@ -199,7 +181,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
             int sectionLocalFlatItemPosition = this.getPositionOfLocalFlatInSectionForAdapterPosition(adapterPosition);
             //아답터 포지션과 연결 된 섹션의 로컬(아이템+헤더+푸터) 타입
             baseType = this.getItemViewBaseType(section, sectionLocalFlatItemPosition);
-            //Log.e("Dlog","getItemViewType() baseType : "+baseType);
+
 
             switch (baseType)
             {
@@ -233,7 +215,10 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
             throw ex;
         }
 
+        //DLog.d("baseType : "+baseType);
+        //DLog.d("baseType : "+userType);
         //밑면 8 비트, 사용자 유형 다음 8 비트
+        //커스텀(사용자) 뷰가 아니라면, 헤더/아이템/푸터 뷰 모두 '0' 을 반환 한다.
         return ((userType & 0xFF) << 8) | (baseType & 0xFF);
 
     }
@@ -255,12 +240,33 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
                 count += section.getSectionItemsTotal();
             }
         }
-        //Log.e("Dlog","getItemCount() count : "+count);
+        //DLog.e("getItemCount() count : "+count);
         return count;
 
     }
 
-
+    //기본 헤더 뷰(헤더/아이템/푸터)
+    //커스텀(사용자) 뷰가 아니라면,  헤더/아이템/푸터 뷰타입이 '0' 이다.
+    //뷰 타입이 '0' 인 경우 헤더/아이템/푸터 기본 뷰를 생성한다.
+    protected int getBaseViewTypeBySection()
+    {
+        return BASE_SECTION_VIEW_TYPE;
+    }
+    //기본 섹션 헤더뷰
+    protected int getBaseHeaderViewTypeBySection()
+    {
+        return BASE_SECTION_VIEW_TYPE_HEADER;
+    }
+    //기본 섹션 아이템뷰
+    protected int getBaseItemViewTypeBySection()
+    {
+        return BASE_SECTION_VIEW_TYPE_ITEM;
+    }
+    //기본 섹션 푸터뷰
+    protected int getBaseFooterViewTypeBySection()
+    {
+        return BASE_SECTION_VIEW_TYPE_FOOTER;
+    }
 
 
     /**
@@ -280,11 +286,21 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public HEADER getHeaderInSection(int sectionIndex)
     {
-        if( null != this.getSections() && this.getSections().get(sectionIndex).hasHeader())
-        {
-            return (HEADER)this.getSections().get(sectionIndex).getHeader();
+        try{
+
+            if (sectionIndex >= this.getSections().size())
+                throw new IndexOutOfBoundsException("Invalid section position");
+            else
+            {
+                if(this.getSections().get(sectionIndex).hasHeader())
+                    return (HEADER)this.getSections().get(sectionIndex).getHeader();
+            }
+
+        }catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
         }
-        //throw new IndexOutOfBoundsException("Invalid position");
+
         return null;
     }
 
@@ -295,11 +311,20 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public FOOTER getFooterInSection(int sectionIndex)
     {
-        if( null != this.getSections() && this.getSections().get(sectionIndex).hasFooter())
-        {
-            return (FOOTER)this.getSections().get(sectionIndex).getFooter();
+        try{
+
+            if (sectionIndex >= this.getSections().size())
+                throw new IndexOutOfBoundsException("Invalid position");
+            else
+            {
+                if( this.getSections().get(sectionIndex).hasFooter())
+                    return (FOOTER)this.getSections().get(sectionIndex).getFooter();
+            }
+        }catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
         }
-        //throw new IndexOutOfBoundsException("Invalid position");
+
         return null;
     }
 
@@ -311,16 +336,26 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public ITEM getItemInSection(int sectionIndex, int sectionItemPosition)
     {
-        if( null != this.getSections() && this.getSections().size() > sectionIndex)
-        {
-            if(null != this.getSections().get(sectionIndex).getItems() && this.getSections().get(sectionIndex).getItems().size() > sectionItemPosition)
-            {
-                return (ITEM)this.getSections().get(sectionIndex).getItems().get(sectionItemPosition);
-            }
-        }
+        try{
 
-        //throw new IndexOutOfBoundsException("Invalid position");
-        return null;
+            if (sectionIndex >= this.getSections().size())
+                throw new IndexOutOfBoundsException("Invalid section position");
+            else
+            {
+                SECTION section = this.getSections().get(sectionIndex);
+                ITEM item = (ITEM)section.getItem(sectionItemPosition);
+                if(null == item)
+                    throw new IndexOutOfBoundsException(String.format("Invalid item position : sectionIndex:{0}, sectionItemPosition:{1} ", sectionIndex, sectionItemPosition));
+                else{
+                    return item;
+                }
+            }
+
+        }
+        catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
+        }
     }
 
     /**
@@ -332,23 +367,31 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
 
         int currentPos = 0;
 
-        for (SECTION section : this.getSections()) {
+        try{
 
-            //보이지 않는 섹션은 무시한다.
-            //if (!section.isVisible())
-            // continue;
+            for (SECTION section : this.getSections()) {
 
-            int sectionTotal = section.getSectionItemsTotal();
+                //보이지 않는 섹션은 무시한다.
+                //if (!section.isVisible())
+                // continue;
 
-            //아답터 포지션에 해당하는 섹션을 반환 한다.
-            if (adapterPosition >= currentPos && adapterPosition <= (currentPos + sectionTotal - 1)) {
-                return section;
+                int sectionTotal = section.getSectionItemsTotal();
+
+                //아답터 포지션에 해당하는 섹션을 반환 한다.
+                if (adapterPosition >= currentPos && adapterPosition <= (currentPos + sectionTotal - 1)) {
+                    return section;
+                }
+
+                currentPos += sectionTotal;
             }
 
-            currentPos += sectionTotal;
+            throw new IndexOutOfBoundsException("Invalid position");
+        }
+        catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
         }
 
-        throw new IndexOutOfBoundsException("Invalid position");
     }
 
 
@@ -359,10 +402,19 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public SECTION getSection(int sectionIndex) {
 
-        if( null != this.getSections() && this.getSections().size() > sectionIndex)
-            return this.getSections().get(sectionIndex);
+        try{
 
-        throw new IndexOutOfBoundsException("Invalid position");
+            if( null != this.getSections() && this.getSections().size() > sectionIndex)
+                return this.getSections().get(sectionIndex);
+
+            throw new IndexOutOfBoundsException("Invalid position");
+        }
+        catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
+        }
+
+
     }
 
     /**
@@ -384,19 +436,30 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public int getPositionInSectionForAdapterPosition(int adapterPosition) {
 
-        int runningTotal = 0;
-        final int size = this.getSections().size();
-        for (int sectionIndex = 0; sectionIndex < size; sectionIndex++)
-        {
-            //섹션 전체 아이템 카운트(헤더+헤더+푸더)
-            int sectionTotal = this.getSections().get(sectionIndex).getSectionItemsTotal();
-            if (adapterPosition < runningTotal + sectionTotal) {
-                return sectionIndex;
+
+
+        try{
+
+            int runningTotal = 0;
+            final int size = this.getSections().size();
+            for (int sectionIndex = 0; sectionIndex < size; sectionIndex++)
+            {
+                //섹션 전체 아이템 카운트(헤더+헤더+푸더)
+                int sectionTotal = this.getSections().get(sectionIndex).getSectionItemsTotal();
+                if (adapterPosition < runningTotal + sectionTotal) {
+                    return sectionIndex;
+                }
+                runningTotal += sectionTotal;
             }
-            runningTotal += sectionTotal;
+
+            throw new IndexOutOfBoundsException("Invalid position");
+        }
+        catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
         }
 
-        throw new IndexOutOfBoundsException("Invalid position");
+
     }
 
 
@@ -480,22 +543,31 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     public int getSectionPositionForAdapterPosition(SECTION section) {
         int currentPos = 0;
 
-        for (SECTION loopSection : this.getSections()) {
+        try{
 
-            //보이지 않는 섹션은 무시한다.
-            //if (!loopSection.isVisible())
-            // continue;
+            for (SECTION loopSection : this.getSections()) {
 
-            if (loopSection == section) {
-                return currentPos;
+                //보이지 않는 섹션은 무시한다.
+                //if (!loopSection.isVisible())
+                // continue;
+
+                if (loopSection == section) {
+                    return currentPos;
+                }
+
+                int sectionTotal = loopSection.getSectionItemsTotal();
+
+                currentPos += sectionTotal;
             }
 
-            int sectionTotal = loopSection.getSectionItemsTotal();
-
-            currentPos += sectionTotal;
+            throw new IllegalArgumentException("Invalid section");
+        }
+        catch(Exception ex){
+            DLog.e(ex);
+            throw ex;
         }
 
-        throw new IllegalArgumentException("Invalid section");
+
     }
 
 

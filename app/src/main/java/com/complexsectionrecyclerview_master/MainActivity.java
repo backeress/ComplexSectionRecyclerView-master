@@ -1,10 +1,10 @@
 package com.complexsectionrecyclerview_master;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import com.complexsectionrecyclerview_master.sample.activity.SampleActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,6 +43,20 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //앱 액티비티 실행
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        Intent intent = new Intent(this, SampleActivity.class);
+        this.startActivity(intent);
+
+        /*
+        int userType = 100;
+        int baseType = 2;
+        DLog.e("결과 : "+(((userType & 0xFF) << 8) | (baseType & 0xFF)) );*/
+        //DLog.e("확인1 : "+((userType & 0xFF) << 8) | (baseType & 0xFF);)
+        //DLog.e("확인1 : "+((userType & 0xFF) << 8) | (baseType & 0xFF);)
     }
 
     @Override
