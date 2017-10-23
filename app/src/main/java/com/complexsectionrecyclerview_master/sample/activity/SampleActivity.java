@@ -146,7 +146,12 @@ public class SampleActivity extends AppCompatActivity {
             //아답터 헤더 추가 시 스티키 데코레이션 영역을 아덥터 헤더 높이를 더한 곳에 그려주면 된다.
             //시간이 없어서 나중에 수정 하도록 한다.
             mRecyclerVieAdapter.showStickyHeaderDecoration();
-            //mRecyclerVieAdapter.hideStickyHeaderDecoration();
+            mRecyclerVieAdapter.hideStickyHeaderDecoration();
+            mRecyclerVieAdapter.showStickyHeaderDecoration();
+            mRecyclerVieAdapter.hideStickyHeaderDecoration();
+            mRecyclerVieAdapter.showStickyHeaderDecoration();
+            mRecyclerVieAdapter.hideStickyHeaderDecoration();
+            mRecyclerVieAdapter.showStickyHeaderDecoration();
 
 
         } catch (Exception ex) {
