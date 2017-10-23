@@ -11,13 +11,16 @@ import com.complex_section_recyclerview.holer.BaseViewHolder;
 
 public interface IAdapter<HEADER,ITEM,FOOTER> {
 
-    //뷰 생성
-    BaseViewHolder onCreateHeaderViewHolder(ViewGroup parent, int viewType);
-    BaseViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType);
-    BaseViewHolder onCreateFooterViewHolder(ViewGroup parent, int viewType);
-    //뷰 바인드
-    void onBindHeaderViewHolder(BaseViewHolder viewHolder, int sectionIndex, int headerUserType, HEADER item);
-    void onBindItemViewHolder(BaseViewHolder viewHolder, int sectionIndex, int itemIndex, int itemUserType, ITEM item);
-    void onBindFooterViewHolder(BaseViewHolder viewHolder, int sectionIndex, int footerUserType, FOOTER item);
+    //[아답터/섹션 헤더/아이템/푸터 뷰]
+    BaseViewHolder onCreateAdapterHeaderViewHolder(ViewGroup parent, int viewType);
+    BaseViewHolder onCreateAdapterFooterViewHolder(ViewGroup parent, int viewType);
+    BaseViewHolder onCreateSectionHeaderViewHolder(ViewGroup parent, int viewType);
+    BaseViewHolder onCreateSectionItemViewHolder(ViewGroup parent, int viewType);
+    BaseViewHolder onCreateSectionFooterViewHolder(ViewGroup parent, int viewType);
+    void onBindAdapterHeaderViewHolder(BaseViewHolder viewHolder, Object adapterHeader);
+    void onBindAdapterFooterViewHolder(BaseViewHolder viewHolder, Object adapterFooter);
+    void onBindSectionHeaderViewHolder(BaseViewHolder viewHolder, int sectionIndex, int headerUserType, HEADER header);
+    void onBindSectionItemViewHolder(BaseViewHolder viewHolder, int sectionIndex, int itemIndex, int itemUserType, ITEM item);
+    void onBindSectionFooterViewHolder(BaseViewHolder viewHolder, int sectionIndex, int footerUserType, FOOTER footer);
 
 }

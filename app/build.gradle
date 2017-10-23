@@ -35,10 +35,9 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     //프로젝트에서 추가 : 내 모듈 라이브러리
-    //compile project(':library')
-    //compile project(':complex-section-recyclerview')
+    compile project(':complex-section-recyclerview')
     //bintray.com 추가 :  모듈을 등록 했기 가져와서 사용 테스트를 한다.
-    compile 'com.backeres:complex-section-recyclerview:2.0'
+    //compile 'com.backeres:complex-section-recyclerview:2.0'
 
     //리사이클뷰 모듈
     compile 'com.android.support:recyclerview-v7:26.+'

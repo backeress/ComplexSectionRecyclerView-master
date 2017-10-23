@@ -14,6 +14,7 @@ import com.complex_section_recyclerview.model.section.BaseSection;
 import com.complex_section_recyclerview.util.DLog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -23,6 +24,10 @@ import java.util.ArrayList;
 public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HEADER extends BaseHeader, ITEM extends BaseItem, FOOTER extends BaseFooter>
         extends RecyclerView.Adapter<BaseViewHolder> implements IAdapter<HEADER,ITEM,FOOTER>
 {
+
+    //아답터 뷰타입
+    public static final int BASE_ADAPTER_VIEW_TYPE_HEADER = -1;
+    public static final int BASE_ADAPTER_VIEW_TYPE_FOOTER = -2;
 
 
     //섹션 베이스 뷰타입
@@ -37,6 +42,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     //베이스 푸터뷰 타입
     public static final int BASE_SECTION_VIEW_TYPE_FOOTER = 3;
 
+
     //컨텍스트
     Context context;
     //리사이클뷰
@@ -45,6 +51,17 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     private ArrayList<SECTION> sections;
     //스티키 데코레이션
     StickyHeaderDecoration stickyHeaderDecoration;
+
+
+    //아답터 헤더/푸터
+    boolean hasHeader=false;
+    boolean hasFooter=false;
+    //아덥터 헤더/푸터 데이터
+    Object headerViewData=null;
+    Object footerViewData=null;
+
+
+
 
 
     /**
@@ -57,7 +74,7 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
         this.context = context;
         this.recyclerView = recyclerView;
         this.sections = sections;
-        //DLog.e("sections.size() : "+sections.size());
+        //DLog.d("sections.size() : "+sections.size());
     }
 
 
@@ -71,37 +88,61 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
+        BaseViewHolder baseViewHolder;
+
         try{
 
-            //베이스 타입
-            // - 섹션 헤더/아이템/푸터
-            int baseViewType = unmaskBaseViewType(viewType);
-            //유저 타입
-            // - 세션 헤더/아이템/푸터의 뷰타입을 유저 뷰타입으로 출력 한다.
-            int userViewType = unmaskUserViewType(viewType);
-
             //DLog.d("viewType : "+viewType);
-            //DLog.d("baseViewType : "+baseViewType);
-            //DLog.d("userViewType : "+userViewType);
-
-            switch (baseViewType) {
-                case BASE_SECTION_VIEW_TYPE_HEADER:
-                    //DLog.e("헤더 뷰 생성");
-                    return onCreateHeaderViewHolder(parent, userViewType);
-                case BASE_SECTION_VIEW_TYPE_ITEM:
-                    //DLog.e("아이템 뷰 생성");
-                    return onCreateItemViewHolder(parent, userViewType);
-                case BASE_SECTION_VIEW_TYPE_FOOTER:
-                    return onCreateFooterViewHolder(parent, userViewType);
-                default:
-                    throw new IndexOutOfBoundsException("알수없는 타입 : " + viewType + " 헤더/아이템/푸터 타입이 아닙니다.");
+            if( BASE_ADAPTER_VIEW_TYPE_HEADER == viewType)
+            {
+                baseViewHolder = onCreateAdapterHeaderViewHolder(parent, viewType);
             }
+            else if(BASE_ADAPTER_VIEW_TYPE_FOOTER == viewType)
+            {
+                baseViewHolder = onCreateAdapterFooterViewHolder(parent, viewType);
+            }
+            else
+            {
+
+                //베이스 타입
+                // - 섹션 헤더/아이템/푸터
+                int baseViewType = unmaskBaseViewType(viewType);
+                //유저 타입
+                // - 세션 헤더/아이템/푸터의 뷰타입을 유저 뷰타입으로 출력 한다.
+                int userViewType = unmaskUserViewType(viewType);
+
+
+                //DLog.d("baseViewType : "+baseViewType);
+                //DLog.d("userViewType : "+userViewType);
+                switch (baseViewType) {
+                    case BASE_SECTION_VIEW_TYPE_HEADER:
+                        //DLog.e("헤더 뷰 생성");
+                        baseViewHolder =  onCreateSectionHeaderViewHolder(parent, userViewType);
+                        break;
+                    case BASE_SECTION_VIEW_TYPE_ITEM:
+                        //DLog.e("아이템 뷰 생성");
+                        baseViewHolder =  onCreateSectionItemViewHolder(parent, userViewType);
+                        break;
+                    case BASE_SECTION_VIEW_TYPE_FOOTER:
+                        baseViewHolder =  onCreateSectionFooterViewHolder(parent, userViewType);
+                        break;
+                    default:
+                        throw new IndexOutOfBoundsException("알수없는 타입 : " + viewType + " 섹션 헤더/아이템/푸터 타입이 아닙니다.");
+                }
+
+            }
+
+
+            if( null == baseViewHolder )
+                throw new IndexOutOfBoundsException("오류 : if( null == baseViewHolder ) 입니다. 뷰홀더를 생성하여 반환 하십시오.");
+
 
         }catch(Exception ex){
             DLog.e(ex);
             throw ex;
         }
 
+        return baseViewHolder;
     }
 
 
@@ -116,36 +157,49 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
         try{
 
             //DLog.d("adapterPosition : "+adapterPosition);
-
-
-            //섹션 포지션
-            int sectionIndex = this.getPositionInSectionForAdapterPosition(adapterPosition);
-            //뷰홀더 타입(헤더/아이템/푸터)
-            int baseType = this.unmaskBaseViewType(holder.getItemViewType());
-            //뷰홀더 유저 타입
-            //헤더/아이템/푸터의 위치에 별도의 뷰타입을 지정한 경우
-            int userType = this.unmaskUserViewType(holder.getItemViewType());
-
-            switch (baseType)
+            if( this.isHeaderPosition(adapterPosition))
             {
-                //섹션 헤더
-                case BASE_SECTION_VIEW_TYPE_HEADER:
-                    onBindHeaderViewHolder(holder, sectionIndex, userType, this.getHeaderInSection(sectionIndex));
-                    break;
-                //섹션 아이템
-                case BASE_SECTION_VIEW_TYPE_ITEM:
-                    //섹션 아아템 포지션
-                    int sectionItemIndex = this.getPositionOfItemInSectionForAdapterPosition(adapterPosition);
-                    ITEM item = this.getItemInSection(sectionIndex, sectionItemIndex);
-                    onBindItemViewHolder(holder, sectionIndex, sectionItemIndex, userType, item);
-                    break;
-                //섹션 푸터
-                case BASE_SECTION_VIEW_TYPE_FOOTER:
-                    onBindFooterViewHolder(holder, sectionIndex, userType, this.getFooterInSection(sectionIndex));
-                    break;
-                default:
-                    throw new IndexOutOfBoundsException("알수없는 타입 : " + baseType + " 헤더/아이템/푸터 타입이 아닙니다.");
+                onBindAdapterHeaderViewHolder(holder, this.headerViewData);
             }
+            else if(this.isFooterPosition(adapterPosition))
+            {
+                onBindAdapterFooterViewHolder(holder, this.footerViewData);
+            }
+            else
+            {
+
+                //섹션 포지션
+                int sectionIndex = this.getPositionInSectionForAdapterPosition(adapterPosition);
+                //뷰홀더 타입(헤더/아이템/푸터)
+                int baseType = this.unmaskBaseViewType(holder.getItemViewType());
+                //뷰홀더 유저 타입
+                //헤더/아이템/푸터의 위치에 별도의 뷰타입을 지정한 경우
+                int userType = this.unmaskUserViewType(holder.getItemViewType());
+
+                switch (baseType)
+                {
+                    //섹션 헤더
+                    case BASE_SECTION_VIEW_TYPE_HEADER:
+                        onBindSectionHeaderViewHolder(holder, sectionIndex, userType, this.getHeaderInSection(sectionIndex));
+                        break;
+                    //섹션 아이템
+                    case BASE_SECTION_VIEW_TYPE_ITEM:
+                        //섹션 아아템 포지션
+                        int sectionItemIndex = this.getPositionOfItemInSectionForAdapterPosition(adapterPosition);
+                        ITEM item = this.getItemInSection(sectionIndex, sectionItemIndex);
+                        onBindSectionItemViewHolder(holder, sectionIndex, sectionItemIndex, userType, item);
+                        break;
+                    //섹션 푸터
+                    case BASE_SECTION_VIEW_TYPE_FOOTER:
+                        onBindSectionFooterViewHolder(holder, sectionIndex, userType, this.getFooterInSection(sectionIndex));
+                        break;
+                    default:
+                        throw new IndexOutOfBoundsException("알수없는 타입 : '" + baseType + "' 섹션 헤더/아이템/푸터 타입이 아닙니다.");
+                }
+            }
+
+
+
 
         }catch(Exception ex){
             DLog.e(ex);
@@ -164,65 +218,83 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     @Override
     public int getItemViewType(int adapterPosition) {
 
-        //DLog.d("adapterPosition : "+adapterPosition);
-
-        int baseType;
-        int userType = 0;
-        try{
-
-            if (adapterPosition < 0) {
-                throw new IndexOutOfBoundsException("아답터 포지션 (" + adapterPosition + ") cannot be < 0");
-            } else if (adapterPosition >= getItemCount()) {
-                throw new IndexOutOfBoundsException("아답터 (" + adapterPosition + ")  cannot be > getItemCount() (" + getItemCount() + ")");
-            }
-
-            int sectionIndex = this.getPositionInSectionForAdapterPosition(adapterPosition);
-            SECTION section =  this.getSection(sectionIndex);
-            //아답터 포지션과 연결 된 섹션의 로컬(아이템+헤더+푸터) 포지션
-            int sectionLocalFlatItemPosition = this.getPositionOfLocalFlatInSectionForAdapterPosition(adapterPosition);
-            //아답터 포지션과 연결 된 섹션의 로컬(아이템+헤더+푸터) 타입
-            baseType = this.getItemViewBaseType(section, sectionLocalFlatItemPosition);
-
-
-            switch (baseType)
-            {
-                //헤더탑입
-                case BASE_SECTION_VIEW_TYPE_HEADER:
-                    userType = getSectionHeaderUserType(sectionIndex);
-                    if (userType < 0 || userType > 0xFF) {
-                        throw new IllegalArgumentException("커스텀 헤더 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
-                    }
-                    break;
-                //아이템타입
-                case BASE_SECTION_VIEW_TYPE_ITEM:
-                    //섹션 아이템 포지션
-                    int sectionItemPosition = this.getPositionOfItemInSectionForAdapterPosition(adapterPosition);
-                    userType = getSectionItemUserType(sectionIndex, sectionItemPosition);
-                    if (userType < 0 || userType > 0xFF) {
-                        throw new IllegalArgumentException("커스텀 아이템 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
-                    }
-                    break;
-                //푸터타입
-                case BASE_SECTION_VIEW_TYPE_FOOTER:
-                    userType = getSectionFooterUserType(sectionIndex);
-                    if (userType < 0 || userType > 0xFF) {
-                        throw new IllegalArgumentException("커스텀 푸터 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
-                    }
-                    break;
-            }
-
-        }catch(Exception ex)
-        {
-            throw ex;
+        if (adapterPosition < 0) {
+            throw new IndexOutOfBoundsException("아답터 포지션 (" + adapterPosition + ") cannot be < 0");
+        } else if (adapterPosition >= getItemCount()) {
+            throw new IndexOutOfBoundsException("아답터 (" + adapterPosition + ")  cannot be > getItemCount() (" + getItemCount() + ")");
         }
 
-        //DLog.d("baseType : "+baseType);
-        //DLog.d("baseType : "+userType);
-        //밑면 8 비트, 사용자 유형 다음 8 비트
-        //커스텀(사용자) 뷰가 아니라면, 헤더/아이템/푸터 뷰 모두 '0' 을 반환 한다.
-        return ((userType & 0xFF) << 8) | (baseType & 0xFF);
+
+
+        DLog.d("adapterPosition : "+adapterPosition);
+
+        if( this.isHeaderPosition(adapterPosition) )
+        {
+            return BASE_ADAPTER_VIEW_TYPE_HEADER;
+        }
+        else if(this.isFooterPosition(adapterPosition))
+        {
+            return BASE_ADAPTER_VIEW_TYPE_FOOTER;
+        }
+        else{
+
+            int baseType;
+            int userType = 0;
+            try{
+
+
+                //아답터 헤더/푸터가 추가된면서 인덱스 값을 빼주어야 한다.
+                //여기부터 이어서 진행 하도록 한다.
+                int sectionIndex = this.getPositionInSectionForAdapterPosition(adapterPosition);
+                SECTION section =  this.getSection(sectionIndex);
+                //아답터 포지션과 연결 된 섹션의 로컬(아이템+헤더+푸터) 포지션
+                int sectionLocalFlatItemPosition = this.getPositionOfLocalFlatInSectionForAdapterPosition(adapterPosition);
+                //아답터 포지션과 연결 된 섹션의 로컬(아이템+헤더+푸터) 타입
+                baseType = this.getItemViewBaseType(section, sectionLocalFlatItemPosition);
+
+
+                switch (baseType)
+                {
+                    //헤더탑입
+                    case BASE_SECTION_VIEW_TYPE_HEADER:
+                        userType = getSectionHeaderUserType(sectionIndex);
+                        if (userType < 0 || userType > 0xFF) {
+                            throw new IllegalArgumentException("섹션 커스텀 헤더 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
+                        }
+                        break;
+                    //아이템타입
+                    case BASE_SECTION_VIEW_TYPE_ITEM:
+
+                        //섹션 아이템 포지션
+                        int sectionItemPosition = this.getPositionOfItemInSectionForAdapterPosition(adapterPosition);
+                        userType = getSectionItemUserType(sectionIndex, sectionItemPosition);
+                        if (userType < 0 || userType > 0xFF) {
+                            throw new IllegalArgumentException("섹션 커스텀 아이템 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
+                        }
+                        break;
+                    //푸터타입
+                    case BASE_SECTION_VIEW_TYPE_FOOTER:
+                        userType = getSectionFooterUserType(sectionIndex);
+                        if (userType < 0 || userType > 0xFF) {
+                            throw new IllegalArgumentException("섹션 커스텀 푸터 뷰 타입 (" + userType + ") 범위여야 합니다. [0,255]");
+                        }
+                        break;
+                }
+                //DLog.d("baseType : "+baseType);
+                //DLog.d("baseType : "+userType);
+                //밑면 8 비트, 사용자 유형 다음 8 비트
+                //커스텀(사용자) 뷰가 아니라면, 헤더/아이템/푸터 뷰 모두 '0' 을 반환 한다.
+                return ((userType & 0xFF) << 8) | (baseType & 0xFF);
+
+            }catch(Exception ex)
+            {
+                DLog.e(ex);
+                throw ex;
+            }
+        }
 
     }
+
 
     /**
      * 아답터 아이템 수 반환
@@ -233,6 +305,68 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
 
 
         int count = 0;
+        //섹션에 포함 된 토탈 아이템 수(헤더+아이템+푸터)
+        count+=this.getDataItemsTotal();
+        //아답터 헤더
+        count+=(this.hasHeader()? 1 : 0);
+        //아답터 푸터
+        count+=(this.hasFooter()? 1 : 0);
+
+        return count;
+
+    }
+
+
+    /**
+     * 아답터 헤더/푸터 존재 유무
+     * @return
+     */
+    public boolean hasHeader() {
+        return this.hasHeader;
+    }
+    public boolean hasFooter() {
+        return this.hasFooter;
+    }
+
+    /**
+     * 아답터 헤더/푸터뷰 출력
+     * @param hasHeader
+     */
+    public void hasHeader(boolean hasHeader) {
+        this.hasHeader = hasHeader;
+        if(false == this.hasHeader )
+            this.headerViewData = null;
+
+    }
+    public void hasFooter(boolean hasFooter) {
+        this.hasFooter = hasFooter;
+        if(false == this.hasFooter )
+            this.footerViewData = null;
+    }
+
+    /**
+     * 아답터 헤더/푸터뷰 출력
+     * @param hasHeader show/hide
+     * @param headerViewData 헤더/푸터뷰 데이터
+     */
+    public void hasHeader(boolean hasHeader,Object headerViewData) {
+        this.hasHeader = hasHeader;
+        this.headerViewData = headerViewData;
+    }
+    public void hasFooter(boolean hasFooter,Object footerViewData) {
+        this.hasFooter = hasFooter;
+        this.footerViewData = footerViewData;
+    }
+
+
+    /**
+     * 아답터 헤더/푸터 아이템 제외한 토탈 아이템을 반환 한다.
+     * 섹션에 포함 된 토탈 아이템 수(헤더+아이템+푸터)
+     * @return
+     */
+    public int getDataItemsTotal()
+    {
+        int count = 0;
         if( null != this.getSections() )
         {
             for ( SECTION section : this.getSections())
@@ -241,10 +375,22 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
                 count += section.getSectionItemsTotal();
             }
         }
-        //DLog.e("getItemCount() count : "+count);
         return count;
-
     }
+
+
+    //아답터 헤더 포지션인가
+    public boolean isHeaderPosition(int position){
+
+        return ( this.hasHeader() && position == 0 );
+    }
+
+    //아답터 푸터 포지션인가
+    public boolean isFooterPosition(int position){
+        return this.hasFooter() && position == this.getDataItemsTotal() + (this.hasHeader() ? 1 : 0);
+    }
+
+
 
     //기본 헤더 뷰(헤더/아이템/푸터)
     //커스텀(사용자) 뷰가 아니라면,  헤더/아이템/푸터 뷰타입이 '0' 이다.
@@ -366,6 +512,10 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public SECTION getSectionForPositionForAdapterPosition(int adapterPosition) {
 
+        //아답터 헤더가 존재한다면,
+        adapterPosition -= (this.hasHeader()?1:0);
+
+
         int currentPos = 0;
 
         try{
@@ -435,11 +585,14 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      * @param adapterPosition
      * @return
      */
-    public int getPositionInSectionForAdapterPosition(int adapterPosition) {
-
-
+    public int getPositionInSectionForAdapterPosition(int adapterPosition)
+    {
 
         try{
+
+            //아답터 헤더가 존재한다면,
+            adapterPosition -= (this.hasHeader()?1:0);
+
 
             int runningTotal = 0;
             final int size = this.getSections().size();
@@ -472,8 +625,11 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
     public int getPositionOfItemInSectionForAdapterPosition(int adapterPosition)
     {
 
-        int currentPos = 0;
+        //아답터 헤더가 존재한다면,
+        adapterPosition -= (this.hasHeader()?1:0);
 
+
+        int currentPos = 0;
         for (SECTION section : this.getSections()) {
 
 
@@ -512,8 +668,11 @@ public abstract class ComplexSectionRecyclerView<SECTION extends BaseSection, HE
      */
     public int getPositionOfLocalFlatInSectionForAdapterPosition(int adapterPosition)
     {
-        int currentPos = 0;
+        //아답터 헤더가 존재한다면,
+        adapterPosition -= (this.hasHeader()?1:0);
 
+
+        int currentPos = 0;
         for (SECTION section : this.getSections()) {
 
             //보이지 않는 섹션은 무시한다.

@@ -33,37 +33,46 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
     private int mPinnedHeaderTop;
     private Rect mClipBounds;
 
+    //onDraw함수를 통해서 아이템이 그려지기 전에 먼저 그릴 수 있다
     @Override
     public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+
+
         createPinnedHeader(parent);
 
-        if (mPinnedHeaderView != null) {
+
+        if (this.mPinnedHeaderView != null) {
+
+
             //체크한다. 오버랩 섹션뷰인지
             //TODO support only vertical header currently.
-            final int headerEndAt = mPinnedHeaderView.getTop() + mPinnedHeaderView.getHeight();
+            final int headerEndAt = this.mPinnedHeaderView.getTop() + this.mPinnedHeaderView.getHeight();
             final View v = parent.findChildViewUnder(c.getWidth() / 2, headerEndAt + 1);
 
-            if (isHeaderView(parent, v)) {
-                mPinnedHeaderTop = v.getTop() - mPinnedHeaderView.getHeight();
+            if (this.isHeaderView(parent, v)) {
+                this.mPinnedHeaderTop = v.getTop() - mPinnedHeaderView.getHeight();
             } else {
-                mPinnedHeaderTop = 0;
+                this.mPinnedHeaderTop = 0;
             }
 
-            mClipBounds = c.getClipBounds();
-            mClipBounds.top = mPinnedHeaderTop + mPinnedHeaderView.getHeight();
-            c.clipRect(mClipBounds);
+            this.mClipBounds = c.getClipBounds();
+            this.mClipBounds.top = this.mPinnedHeaderTop + this.mPinnedHeaderView.getHeight();
+            c.clipRect(this.mClipBounds);
         }
     }
 
+    //onDrawOver함수를 통해서 아이템 위에 덮어서 그릴 수 있다.
     @Override
     public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        if (mPinnedHeaderView != null) {
+
+
+        if (this.mPinnedHeaderView != null) {
             c.save();
 
-            mClipBounds.top = 0;
-            c.clipRect(mClipBounds, Region.Op.UNION);
-            c.translate(0, mPinnedHeaderTop);
-            mPinnedHeaderView.draw(c);
+            this.mClipBounds.top = 0;
+            c.clipRect(this.mClipBounds, Region.Op.UNION);
+            c.translate(0, this.mPinnedHeaderTop);
+            this.mPinnedHeaderView.draw(c);
 
             c.restore();
         }
@@ -84,11 +93,11 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         final int firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition();
         final int headerPosition = findPinnedHeaderPosition(firstVisiblePosition);
 
-        if (headerPosition >= 0 && mHeaderPosition != headerPosition) {
-            mHeaderPosition = headerPosition;
-            final int viewType = mAdapter.getItemViewType(headerPosition);
+        if (headerPosition >= 0 && this.mHeaderPosition != headerPosition) {
+            this.mHeaderPosition = headerPosition;
+            final int viewType = this.mAdapter.getItemViewType(headerPosition);
 
-            final RecyclerView.ViewHolder pinnedViewHolder = mAdapter.createViewHolder(parent, viewType);
+            final RecyclerView.ViewHolder pinnedViewHolder = this.mAdapter.createViewHolder(parent, viewType);
             mAdapter.bindViewHolder(pinnedViewHolder, headerPosition);
             mPinnedHeaderView = pinnedViewHolder.itemView;
 
@@ -119,13 +128,19 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         }
     }
 
+
     private int findPinnedHeaderPosition(int fromPosition) {
-        if (fromPosition > mAdapter.getItemCount()) {
+
+        if( this.mAdapter.hasHeader() && 0 == fromPosition)
+        {
+            return -1;
+        }
+        else if (fromPosition > this.mAdapter.getItemCount()) {
             return -1;
         }
 
         for (int position = fromPosition; position >= 0; position--) {
-            final int viewType = mAdapter.getItemViewType(position);
+            final int viewType = this.mAdapter.getItemViewType(position);
             if (isSectionViewType(viewType)) {
                 return position;
             }
@@ -136,8 +151,8 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
 
     //섹션 타입인가
     private boolean isSectionViewType(int viewType) {
-        if (!mPinnedViewTypes.containsKey(viewType)) {
-            mPinnedViewTypes.put(viewType, mAdapter.isSectionHeaderViewType(viewType));
+        if (!this.mPinnedViewTypes.containsKey(viewType)) {
+            this.mPinnedViewTypes.put(viewType, this.mAdapter.isSectionHeaderViewType(viewType));
         }
 
         return mPinnedViewTypes.get(viewType);
@@ -146,29 +161,33 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
     //파라미터 뷰가 헤더뷰인가
     private boolean isHeaderView(RecyclerView parent, View v) {
         final int position = parent.getChildPosition(v);
-        if (position == RecyclerView.NO_POSITION) {
+        if( this.mAdapter.hasHeader() && 0 == position)
+        {
             return false;
         }
-        final int viewType = mAdapter.getItemViewType(position);
+        else if (position == RecyclerView.NO_POSITION) {
+            return false;
+        }
+        final int viewType = this.mAdapter.getItemViewType(position);
 
         return isSectionViewType(viewType);
     }
 
     private void checkCache(RecyclerView parent) {
         ComplexSectionRecyclerView adapter = (ComplexSectionRecyclerView)parent.getAdapter();
-        if (mAdapter != adapter) {
+        if (this.mAdapter != adapter) {
             disableCache();
             if (adapter instanceof ComplexSectionRecyclerView) {
-                mAdapter = adapter;
+                this.mAdapter = adapter;
             } else {
-                mAdapter = null;
+                this.mAdapter = null;
             }
         }
     }
 
     private void disableCache() {
-        mPinnedHeaderView = null;
-        mHeaderPosition = -1;
-        mPinnedViewTypes.clear();
+        this.mPinnedHeaderView = null;
+        this.mHeaderPosition = -1;
+        this.mPinnedViewTypes.clear();
     }
 }
